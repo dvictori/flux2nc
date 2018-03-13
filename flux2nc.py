@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 
 #----------------------------------------------------
 # Program to convert VIC fluxes files to NetCDF file
@@ -12,16 +12,23 @@
 #------------------------------------------------
 # Writen by Daniel de Castro Victoria
 # dvictori@cena.usp.br or daniel.victoria@gmail.com
-# Needs python libraries Numeric and Scientific
 # 03-dec-2004
+#
+# 13-mar-2018: Code update. Change libraries and treat
+# header lines. Changes done by Stuart Smith (smit1770 at purdue dot edu)
 #-------------------------------------------------
 
-import os, sys, string
+import os
+import sys
 # handle dates...
 import datetime
-# NetCDF and Numeric
-from Scientific.IO.NetCDF import *
-from Numeric import *
+# SciPy netCDF and NumPy
+from scipy.io.netcdf import *
+from numpy import *
+
+# In case flux files contains header lines
+# set the variable according to the number of lines
+skip_lines = 0
 
 # checking user input
 if len(sys.argv) != 2:
@@ -47,8 +54,8 @@ lat = []
 lon = []
 
 for f in file_list:
-    lat_t.append(float(string.split(f, "_")[1]))
-    lon_t.append(float(string.split(f, "_")[2]))
+    lat_t.append(float(f.split("_")[1]))
+    lon_t.append(float(f.split("_")[2]))
 
 for i in lat_t:
     if i not in lat:
@@ -129,34 +136,34 @@ c = len(file_list)
 # for each file in list
 for f in file_list:
     # get lat & lon and it's index
-    latitude = float(string.split(f, sep="_")[1])
-    longitude = float(string.split(f, sep="_")[2])
+    latitude = float(f.split("_")[1])
+    longitude = float(f.split("_")[2])
     lat_id = lat.index(latitude)
     lon_id = lon.index(longitude)
 
     print "%i files to write." % c
     c = c -1
-    
+
     infile = open(sys.argv[1]+f, "r")
-    lixo = infile.readlines()
+    # here we skip the number of header lines
+    # variable set at the begining of the code
+    lixo = infile.readlines()[skip_lines:]
     infile.close()
     dado = []
 
     for l in lixo:
-        if int(string.split(l, sep="\t")[0]) in range(inidate.year, enddate.year+1):
-            dado.append(float(string.split(l, sep="\t")[var]))
+        if int(l.split("\t")[0]) in range(inidate.year, enddate.year+1):
+            dado.append(float(l.split("\t")[var]))
         # putting data inside array.
         # Since data has lat & lon fixed uses dimension [:,lat_index,lon_index]
 
     all_data[:,lat_id,lon_id] = dado
-    
-
 
 #
 # writing NetCDF
 #
 
-ncfile = NetCDFFile(var_txt+".nc", "w")
+ncfile = netcdf_file(var_txt+".nc", "w")
 
 ncfile.Conventions = "COARDS"
 ncfile.history = "Created using flux2cdf.py. " + datetime.date.today().isoformat()
