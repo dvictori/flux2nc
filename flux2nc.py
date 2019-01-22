@@ -129,7 +129,7 @@ print "Go grab a coffe, this could take a while..."
 # Then populate the array by reading each flux file
 #
 
-all_data = zeros([days,len(lat),len(lon)], Float)-9999
+all_data = zeros([days,len(lat),len(lon)], float)-9999
 
 c = len(file_list)
 
