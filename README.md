@@ -1,4 +1,7 @@
 # flux2nc
+
+[![DOI](https://zenodo.org/badge/116668688.svg)](https://zenodo.org/badge/latestdoi/116668688)
+
 Convert VIC fluxes files to netCDF format
 
 Program to convert VIC 4.x model output to netCDF file.
